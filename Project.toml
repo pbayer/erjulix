@@ -5,10 +5,11 @@ version = "0.1.0"
 
 [deps]
 ErlangTerm = "6cf46ab0-e18c-5424-9784-c70c22e5b0c7"
+Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [compat]
-julia = "1.6"
 ErlangTerm = "0.1"
+julia = "1.6"
 
 [extras]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
