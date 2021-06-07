@@ -1,0 +1,23 @@
+-module(srv).
+-export([start_server/0]).
+
+start_server() ->
+    spawn(fun() -> loop() end).
+
+%% The server loop
+loop() ->
+    receive
+        {Caller, Fport, Msg} ->
+            spawn(fun() -> par_connect(Caller, Fport, Msg) end),
+            loop()
+    end.
+
+%% parallel connect
+par_connect(Caller, Fport, Msg) ->
+    Value = client(Fport, Msg),
+    case Value of
+        timeout ->
+            Caller ! {error, timeout};
+        _ ->
+            Caller ! {ok, Value}
+    end.
