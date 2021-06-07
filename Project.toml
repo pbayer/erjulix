@@ -1,0 +1,4 @@
+name = "Erjulix"
+uuid = "de6a4c11-948d-47de-a21c-147f86858631"
+authors = ["Paul Bayer <Paul.Bayer@gleichsam.de>"]
+version = "0.1.0"

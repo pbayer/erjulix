@@ -1,0 +1,6 @@
+%{
+  erlzmq:
+    {:hex, :erlzmq_dnif, "4.1.0",
+     "f6fab2a98ca8081b7098e1ef62cd5994c7ab133667e042df26ff5807d6de8134", [:rebar3], [], "hexpm",
+     "241fe589d949b3ba47258f37e5482075d728857e2a50ff52c99dcdfd4d9fd435"}
+}
