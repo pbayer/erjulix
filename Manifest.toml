@@ -1,0 +1,11 @@
+# This file is machine-generated - editing it directly is not advised
+
+[[ErlangTerm]]
+git-tree-sha1 = "89f4abcd4934165aa06a00c69bed94ad4b4f22ed"
+repo-rev = "master"
+repo-url = "https://github.com/pbayer/ErlangTerm.jl"
+uuid = "6cf46ab0-e18c-5424-9784-c70c22e5b0c7"
+version = "0.1.0"
+
+[[Sockets]]
+uuid = "6462fe0b-24de-5631-8697-dd941f90decc"

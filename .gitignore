@@ -19,7 +19,7 @@ erjulix-*.tar
 *.jl.cov
 *.jl.mem
 .DS_Store
-/Manifest.toml
+# /Manifest.toml
 /dev/
 docs/build
-docs/Manifest.toml
+# docs/Manifest.toml
