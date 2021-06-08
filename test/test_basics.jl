@@ -12,7 +12,7 @@ function getPort(start::Integer)
 end
 
 localhost = Sockets.localhost
-pport = getPort(7777)
+pport = getPort(100)
 ps = pServer(pport)
 erl = UDPSocket()     # erlang test socket
 
