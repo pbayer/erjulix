@@ -2,13 +2,14 @@ using Test, Sockets, Erjulix, ErlangTerm
 
 function getPort(start::Integer)
     s = UDPSocket()
-    sock = start
+    port = start
     while true
-        bind(s, Sockets.localhost, sock) && break
-        sock += 1
+        bind(s, Sockets.localhost, port) && break
+        port += 1
+        port > 65535 && throw(SystemError("no port available"))
     end
     close(s)
-    sock
+    port
 end
 
 localhost = Sockets.localhost
