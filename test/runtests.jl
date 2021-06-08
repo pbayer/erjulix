@@ -1,3 +1,4 @@
+using Erjulix
 using Test, SafeTestsets
 
-@safetestset "Basics" begin include("basics.jl") end
+@safetestset "Basics" begin include("test_basics.jl") end
