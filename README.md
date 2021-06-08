@@ -2,6 +2,11 @@
 
 Connecting Erlang, Julia, Elixir
 
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://pbayer.github.io/erjulix/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://pbayer.github.io/erjulix/dev)
+[![Build Status](https://github.com/pbayer/erjulix/workflows/CI/badge.svg)](https://github.com/pbayer/erjulix/actions)
+[![Coverage](https://codecov.io/gh/pbayer/erjulix/branch/master/graph/badge.svg)](https://codecov.io/gh/pbayer/erjulix)
+
 ## Project
 
 This is my ambitious little project to connect the different worlds of Erlang/Elixir and Julia:

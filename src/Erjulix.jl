@@ -138,7 +138,7 @@ function _listen(sock, port)
             break
         elseif val == :srv
             md = parServer(hp)
-            println("parServer $md")
+            # println("parServer $md")
         else
             println("parServer cannot $val")
         end
