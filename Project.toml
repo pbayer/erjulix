@@ -8,7 +8,6 @@ ErlangTerm = "6cf46ab0-e18c-5424-9784-c70c22e5b0c7"
 Sockets = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [compat]
-ErlangTerm = "0.1"
 julia = "1.6"
 
 [extras]
