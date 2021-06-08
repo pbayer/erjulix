@@ -4,17 +4,16 @@ Connecting Erlang, Julia, Elixir
 
 ## Project
 
-This is my little ambitious project to connect the different worlds of Erlang/Elixir and Julia:
+This is my ambitious little project to connect the different worlds of Erlang/Elixir and Julia:
 
 - Provide one package for three platforms/languages,
-- Allow them to talk to and to call each other.
+- Allow them to talk to and call each other.
 
 Now Erlang and Elixir processes can send messages to each other since they run on the same BEAM platform and share PIDs. But how about sending messages to Julia and back to Erlang/Elixir.
 
 ## A sample session
 
-In the Julia REPL we start a pServer task, which spawns an
-EvalServer task with its own module namespace on demand.
+In the Julia REPL we start a pServer task, which on demand spawns an `EvalServer` task with its own module namespace.
 
 ```julia
 julia> using Erjulix, Sockets
@@ -44,10 +43,55 @@ iex(6)> :ejx_udp.eval(jl, """    # define a function on the Julia server
 ...(6)> end
 ...(6)> """)
 {:ok, "Main.##esm#257.fact"}
-iex(7)> :ejx_udp.call(jl, :fact, [500])   # call it
-{:ok,
- 1220136825991110068701238785423046926253574342803192842192413588385845373153881997605496447502203281863013616477148203584163378722078177200480785205159329285477907571939330603772960859086270429174547882424912726344305670173270769461062802310452644218878789465754777149863494367781037644274033827365397471386477878495438489595537537990423241061271326984327745715546309977202781014561081188373709531016356324432987029563896628911658974769572087926928871281780070265174507768410719624390394322536422605234945850129918571501248706961568141625359056693423813008856249246891564126775654481886506593847951775360894005745238940335798476363944905313062323749066445048824665075946735862074637925184200459369692981022263971952597190945217823331756934581508552332820762820023402626907898342451712006207714640979456116127629145951237229913340169552363850942885592018727433795173014586357570828355780158735432768888680120399882384702151467605445407663535984174430480128938313896881639487469658817504506926365338175055478128640000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000}
+iex(7)> :ejx_udp.call(jl, :fact, [50])
+{:ok, 30414093201713378043612608166064768844377641568960512000000000000}
+iex(8)> :timer.tc(:ejx_udp, :call, [jl, :fact, [55]])
+{528,
+ {:ok,
+  12696403353658275925965100847566516959580321051449436762275840000000000000}}
 ```
+
+The last timing shows that the ping-pong for calling the created Julia fact function with data from Elixir and getting the result back takes roughly 500 µs with both sessions running on the same machine (MacBook Pro).
+
+```elixir
+iex(9)> a = Enum.map(1..10, fn _ -> :rand.uniform() end)
+[0.9414436609049482, 0.08244595999142224, 0.6727398779368937,
+ 0.18612089183158875, 0.7414592106015152, 0.7340558985797445,
+ 0.9511971092470349, 0.7139960750204088, 0.31514816254491884, 0.94168140313657]
+iex(10)> :ejx_udp.set(jl, :a, a)  # create variable a on the Julia server
+{:ok, []}
+```
+
+Back in the Julia REPL:
+
+```julia
+julia> exmod = Erjulix._ESM[1]  # get access to the server module
+Main.##esm#257
+
+julia> exmod.a                  # and to the created variable a
+10-element Vector{Any}:
+ 0.9414436609049482
+ 0.08244595999142224
+ 0.6727398779368937
+ 0.18612089183158875
+ ⋮
+ 0.9511971092470349
+ 0.7139960750204088
+ 0.31514816254491884
+ 0.94168140313657
+
+julia> using Plots ....
+```
+
+**Caveat:** of course accessing the server module that way is not thread-safe and thus should not be done concurrently.
+
+## ToDo
+
+Implement an Elixir server to serve Julia with Elixir/Erlang functionality.
+
+## Rationale
+
+This is a quick prototype for interoperability based on [Erlang`s Term Format](http://erlang.org/doc/apps/erts/erl_ext_dist.html) over UDP. It allows applications in Web services, IoT or microservices. A more general application should be done with [OSC](http://opensoundcontrol.org).
 
 ## Installation
 
