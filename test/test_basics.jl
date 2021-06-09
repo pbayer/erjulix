@@ -30,19 +30,28 @@ eport = hp.port
 # test eval 
 println("test :eval")
 send(erl, localhost, eport, serialize((:eval, "sum(1:10)")))
-msg = deserialize(recv(erl))
+sleep(0.2)
+@test Erjulix._ESM[end]._eServer.state == :runnable
+pkg = recv(erl)
+msg = deserialize(pkg)
 @test msg == (:ok, 55)
 
 # test call
 println("test :call")
 send(erl, localhost, eport, serialize((:call, :sum, [collect(11:20)])))
-msg = deserialize(recv(erl))
+sleep(0.2)
+@test Erjulix._ESM[end]._eServer.state == :runnable
+pkg = recv(erl)
+msg = deserialize(pkg)
 @test msg == (:ok, 155)
 
 # test set
 println("test :set")
 send(erl, localhost, eport, serialize((:set, :a, collect(21:30))))
-msg = deserialize(recv(erl))
+sleep(0.2)
+@test Erjulix._ESM[end]._eServer.state == :runnable
+pkg = recv(erl)
+msg = deserialize(pkg)
 @test msg == (:ok, [])
 @test Erjulix._ESM[end].a == collect(21:30)
 
