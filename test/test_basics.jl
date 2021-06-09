@@ -17,6 +17,7 @@ pport = getPort(100)
 println("pServer setup")
 ps = pServer(pport)
 erl = UDPSocket()     # erlang test socket
+bind(erl, localhost, getPort(1000))
 
 @test ps.state == :runnable
 send(erl, localhost, pport, serialize(:srv))
@@ -30,8 +31,10 @@ eport = hp.port
 # test eval 
 println("test :eval")
 send(erl, localhost, eport, serialize((:eval, "sum(1:10)")))
+println("msg sent!")
 sleep(0.2)
 @test Erjulix._ESM[end]._eServer.state == :runnable
+println("server ok")
 pkg = recv(erl)
 msg = deserialize(pkg)
 @test msg == (:ok, 55)
