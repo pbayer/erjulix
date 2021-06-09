@@ -31,16 +31,15 @@ uuid = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 
 [[Erjulix]]
 deps = ["ErlangTerm", "Sockets"]
-git-tree-sha1 = "747b802ef78ad49665d1961b45e3287253d64ecc"
+git-tree-sha1 = "2de4799a246721a9755936d91c14a7dbc85a5f00"
 repo-rev = "master"
 repo-url = "https://github.com/pbayer/erjulix"
 uuid = "de6a4c11-948d-47de-a21c-147f86858631"
 version = "0.1.0"
 
 [[ErlangTerm]]
-git-tree-sha1 = "ca15231412d4f7714aeb6e8b99d351c9719e7922"
-repo-rev = "master"
-repo-url = "https://github.com/pbayer/ErlangTerm.jl"
+deps = ["Test"]
+git-tree-sha1 = "04a208013514603aa21796de554f82cf93ea020c"
 uuid = "6cf46ab0-e18c-5424-9784-c70c22e5b0c7"
 version = "0.1.0"
 

@@ -1,4 +1,3 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Erjulix = "de6a4c11-948d-47de-a21c-147f86858631"
-ErlangTerm = "6cf46ab0-e18c-5424-9784-c70c22e5b0c7"

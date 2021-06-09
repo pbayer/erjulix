@@ -22,4 +22,4 @@ erjulix-*.tar
 # /Manifest.toml
 /dev/
 docs/build
-# docs/Manifest.toml
+docs/Manifest.toml
