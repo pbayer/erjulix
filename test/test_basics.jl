@@ -13,11 +13,13 @@ function getPort(start::Integer)
 end
 
 localhost = Sockets.localhost
-pport = getPort(100)
+erl = UDPSocket()     # erlang test socket
+ep = getPort(1000)
+@test bind(erl, localhost, ep)
+
+pport = getPort(1000)
 println("pServer setup")
 ps = pServer(pport)
-erl = UDPSocket()     # erlang test socket
-bind(erl, localhost, getPort(1000))
 
 @test ps.state == :runnable
 send(erl, localhost, pport, serialize(:srv))
@@ -32,10 +34,11 @@ eport = hp.port
 println("test :eval")
 send(erl, localhost, eport, serialize((:eval, "sum(1:10)")))
 println("msg sent!")
-sleep(0.2)
+sleep(0.5)
 @test Erjulix._ESM[end]._eServer.state == :runnable
 println("server ok")
 pkg = recv(erl)
+println("got message from server")
 msg = deserialize(pkg)
 @test msg == (:ok, 55)
 
