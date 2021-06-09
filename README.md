@@ -96,7 +96,10 @@ Implement an Elixir server to serve Julia with Elixir/Erlang functionality.
 
 ## Rationale
 
-This is a quick prototype for interoperability based on [Erlang`s Term Format](http://erlang.org/doc/apps/erts/erl_ext_dist.html) over UDP. It allows applications in Web services, IoT or microservices. A more general application should be done with [OSC](http://opensoundcontrol.org).
+This is a quick prototype for interoperability based on [Erlang`s Term Format](http://erlang.org/doc/apps/erts/erl_ext_dist.html) over UDP. It allows applications in Web services, IoT or microservices.
+
+- It is suitable for experimenting and learning before providing Julia [Actors](https://github.com/JuliaActors/Actors.jl) with functionality for sharing messages with Erlang/Elixir.
+- A more general application, providing message-based interop also with other languages should be done with [OSC](http://opensoundcontrol.org).
 
 ## Installation
 
