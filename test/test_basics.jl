@@ -1,23 +1,11 @@
 using Test, Sockets, Erjulix, ErlangTerm
 
-function getPort(start::Integer)
-    s = UDPSocket()
-    port = start
-    while true
-        bind(s, Sockets.localhost, port) && break
-        port += 1
-        port > 65535 && throw(SystemError("no port available"))
-    end
-    close(s)
-    port
-end
-
 localhost = Sockets.localhost
 erl = UDPSocket()     # erlang test socket
-ep = getPort(1000)
+ep = Erjulix.getPort(1000)
 @test bind(erl, localhost, ep)
 
-pport = getPort(1000)
+pport = Erjulix.getPort(1000)
 println("pServer setup")
 ps = pServer(pport)
 
@@ -25,14 +13,14 @@ ps = pServer(pport)
 send(erl, localhost, pport, serialize(:srv))
 hp, pkg = recvfrom(erl)
 msg = deserialize(pkg)
-eport = hp.port
 @test hp.host == localhost
 @test first(msg) == :ok
 @test last(msg) == repr(Erjulix._ESM[end])
+println("EvalServer at $(hp.host):$(hp.port)")
 
 # test eval 
 println("test :eval")
-send(erl, localhost, eport, serialize((:eval, "sum(1:10)")))
+send(erl, hp.host, hp.port, serialize((:eval, "sum(1:10)")))
 println("msg sent!")
 sleep(0.5)
 @test Erjulix._ESM[end]._eServer.state == :runnable
@@ -44,7 +32,7 @@ msg = deserialize(pkg)
 
 # test call
 println("test :call")
-send(erl, localhost, eport, serialize((:call, :sum, [collect(11:20)])))
+send(erl, hp.host, hp.port, serialize((:call, :sum, [collect(11:20)])))
 sleep(0.2)
 @test Erjulix._ESM[end]._eServer.state == :runnable
 pkg = recv(erl)
@@ -53,7 +41,7 @@ msg = deserialize(pkg)
 
 # test set
 println("test :set")
-send(erl, localhost, eport, serialize((:set, :a, collect(21:30))))
+send(erl, hp.host, hp.port, serialize((:set, :a, collect(21:30))))
 sleep(0.2)
 @test Erjulix._ESM[end]._eServer.state == :runnable
 pkg = recv(erl)
@@ -63,7 +51,7 @@ msg = deserialize(pkg)
 
 # test exit
 println("test :exit")
-send(erl, localhost, eport, serialize(:exit))
+send(erl, hp.host, hp.port, serialize(:exit))
 sleep(0.5)
 @test Erjulix._ESM[end]._eServer.state == :done
 

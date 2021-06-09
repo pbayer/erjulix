@@ -7,6 +7,8 @@ export eServer, pServer, EvalServer, recv_erl, send_erl
 # Vector of created eServer modules
 const _ESM = Module[]
 
+include("utils.jl")
+
 """
     eServer(port::Integer)
 
@@ -17,6 +19,8 @@ function eServer(host::IPAddr, port::Integer)
     sock = UDPSocket()
     if bind(sock, host, port)
         mdl = Module(gensym(:esm))
+        hp = getHostPort(sock)
+        println("start EvalServer $host:$(hp.port), $mdl")
         t = Threads.@spawn EvalServer(sock, mdl)
         Core.eval(mdl, :(_socket = $sock))
         Core.eval(mdl, :(_eServer = $t))
