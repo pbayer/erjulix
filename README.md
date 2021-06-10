@@ -14,7 +14,7 @@ This is my ambitious little project to connect the different worlds of Erlang/El
 - Provide one package for three platforms/languages,
 - Allow them to talk to and call each other.
 
-Now Erlang and Elixir processes can send messages to each other since they run on the same BEAM platform and share PIDs. But how about sending messages to Julia and back to Erlang/Elixir.
+Now Erlang and Elixir processes can send messages to each other since they run on the same BEAM platform and share PIDs. But how about sending messages to Julia and back to Erlang/Elixir?
 
 ## A sample session
 
@@ -88,18 +88,23 @@ julia> exmod.a                  # and to the created variable a
 julia> using Plots ....
 ```
 
-**Caveat:** of course accessing the server module that way is not thread-safe and thus should not be done concurrently.
-
-## ToDo
-
-Implement an Elixir server to serve Julia with Elixir/Erlang functionality.
-
 ## Rationale
 
 This is a quick prototype for interoperability based on [Erlang`s Term Format](http://erlang.org/doc/apps/erts/erl_ext_dist.html) over UDP. It allows applications in Web services, IoT or microservices.
 
 - It is suitable for experimenting and learning before providing Julia [Actors](https://github.com/JuliaActors/Actors.jl) with functionality for sharing messages with Erlang/Elixir.
 - A more general application, providing message-based interop also with other languages should be done with [OSC](http://opensoundcontrol.org).
+
+## Caveats
+
+**Thread-safety:** Of course accessing the server module as demonstrated is not thread-safe and thus should not be done concurrently.
+
+**Security:** If you share UDP-Server addresses and ports, a remote client can get access to the filesystem.
+
+## ToDo
+
+- [ ] Implement [JWT](https://jwt.io) tokenized secure data transmission,
+- [ ] Implement an Elixir server to serve Julia with Elixir/Erlang functionality.
 
 ## Installation
 
