@@ -90,21 +90,28 @@ julia> using Plots ....
 
 ## Rationale
 
-This is a quick prototype for interoperability based on [Erlang`s Term Format](http://erlang.org/doc/apps/erts/erl_ext_dist.html) over UDP. It allows applications in Web services, IoT or microservices.
+This is a quick prototype for interoperability based on [Erlang`s Term Format](http://erlang.org/doc/apps/erts/erl_ext_dist.html) over UDP. 
 
 - It is suitable for experimenting and learning before providing Julia [Actors](https://github.com/JuliaActors/Actors.jl) with functionality for sharing messages with Erlang/Elixir.
+- It allows applications in Web services, IoT or microservices.
 - A more general application, providing message-based interop also with other languages should be done with [OSC](http://opensoundcontrol.org).
 
 ## Caveats
 
 **Thread-safety:** Of course accessing the server module as demonstrated is not thread-safe and thus should not be done concurrently.
 
-**Security:** If you share UDP-Server addresses and ports, a remote client can get access to the filesystem.
+**Security:** If you share UDP-Server addresses and ports, a remote client can get access to the filesystem. If you provide 
+a key to the `pServer`, data transmissions will use SHA-256 encryption.
 
 ## ToDo
 
-- [ ] Implement [JWT](https://jwt.io) tokenized secure data transmission,
+- [x] Implement [JWT](https://jwt.io) tokenized secure data transmission,
 - [ ] Implement an Elixir server to serve Julia with Elixir/Erlang functionality.
+
+## Dependencies
+
+- The Julia package currently depends on [a fork](https://github.com/pbayer/ErlangTerm.jl) of `ErlangTerm`. There is a [PR](https://github.com/helgee/ErlangTerm.jl/pull/3) to update the official version.
+- The Erlang/Elixir part depends on [a fork](https://github.com/pbayer/jwerl) of `jwerl`, compatible with Erlang/OTP 24. There is [an issue](https://gitlab.com/glejeune/jwerl/-/issues/18) to update the main repo.
 
 ## Installation
 

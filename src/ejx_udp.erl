@@ -2,10 +2,13 @@
 -export([call/2, call/3, call/4, eval/2, eval/3, set/3, set/4,
     client/2, client/3, srv/1]).
 
-%% @type addr(). Can be a port on the localhost or a tuple of
-%% an IP address and a port number.
+%% @type addr(). Can be 
+%% - a port on the localhost or 
+%% - a tuple of an IP address and a port number or
+%% - a tuple of an IP address, a port number and a key.
 -type addr() :: inet:port_number() 
-             | {inet:ip_address(), inet:port_number()}.
+             | {inet:ip_address(), inet:port_number()}
+             | {inet:ip_address(), inet:port_number(), string()}.
 
 %% A Julia term is either an atom referring to a variable or 
 %% callable or a string containing a Julia expression.
@@ -76,12 +79,15 @@ client(Port, Msg, Timeout) when is_integer(Port) ->
     client({"localhost", Port}, Msg, Timeout);
 
 client({Host, Port}, Msg, Timeout) ->
-    Bin = term_to_binary(Msg),
+    client({Host, Port, ""}, Msg, Timeout);
+
+client({Host, Port, Key}, Msg, Timeout) ->
+    Bin = term_to_binary_k(Msg, Key),
     {ok, Socket} = gen_udp:open(0, [binary]),
     ok = gen_udp:send(Socket, Host, Port, Bin),
     Value = receive
         {udp, Socket, _, _, Recv} ->
-            binary_to_term(Recv)
+            binary_to_term_k(Recv, Key)
         after Timeout ->
             timeout
         end,
@@ -90,11 +96,14 @@ client({Host, Port}, Msg, Timeout) ->
 
 -spec srv(addr()) -> {ok, addr(), any()}.
 srv({Host, Port}) ->
+    srv({Host, Port, ""});
+
+srv({Host, Port, Key}) ->
     {ok, Socket} = gen_udp:open(0, [binary]),
-    ok = gen_udp:send(Socket, Host, Port, term_to_binary(srv)),
+    ok = gen_udp:send(Socket, Host, Port, term_to_binary_k(srv, Key)),
     Value = receive
         {udp, Socket, Shost, Sport, Recv} ->
-            {ok, {Shost, Sport}, binary_to_term(Recv)}
+            {ok, {Shost, Sport}, binary_to_term_k(Recv, Key)}
         after 5000 ->
             timeout
         end,
@@ -103,3 +112,17 @@ srv({Host, Port}) ->
 
 srv(Port) ->
     srv({"localhost", Port}).
+
+term_to_binary_k(T, "") ->
+    term_to_binary(T);
+
+term_to_binary_k(T, Key) ->
+    L = binary_to_list(term_to_binary(T)),
+    jwerl:sign(L, hs256, Key).
+
+binary_to_term_k(B, "") ->
+    binary_to_term(B);
+
+binary_to_term_k(B, Key) ->
+    {ok, L} = jwerl:verify(B, hs256, Key),
+    binary_to_term(list_to_binary(L)).

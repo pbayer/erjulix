@@ -1,5 +1,6 @@
 %{
   "erlzmq": {:hex, :erlzmq_dnif, "4.1.0", "f6fab2a98ca8081b7098e1ef62cd5994c7ab133667e042df26ff5807d6de8134", [:rebar3], [], "hexpm", "241fe589d949b3ba47258f37e5482075d728857e2a50ff52c99dcdfd4d9fd435"},
-  "jsx": {:hex, :jsx, "2.9.0", "d2f6e5f069c00266cad52fb15d87c428579ea4d7d73a33669e12679e203329dd", [:mix, :rebar3], [], "hexpm", "8ee1db1cabafdd578a2776a6aaae87c2a8ce54b47b59e9ec7dab5d7eb71cd8dc"},
-  "jwerl": {:hex, :jwerl, "1.1.0", "51f1893c797fa478b2fa569fa8e054da63cd628c5e2d93a0bc46f6b4f105a35e", [:make, :mix, :rebar3], [{:jsx, "~> 2.9.0", [hex: :jsx, repo: "hexpm", optional: false]}], "hexpm", "080ef526bfae523148394703ef1a5b0cdbc8a3a5519a0d1ea2800db436ef818d"},
+  "jsx": {:hex, :jsx, "2.10.0", "77760560d6ac2b8c51fd4c980e9e19b784016aa70be354ce746472c33beb0b1c", [:rebar3], [], "hexpm", "9a83e3704807298016968db506f9fad0f027de37546eb838b3ae1064c3a0ad62"},
+  "jwerl": {:git, "https://github.com/pbayer/jwerl.git", "ee5bfbfc0292ab007529ec09fb02cbeb69d8c0f9", []},
+  "plug_crypto": {:hex, :plug_crypto, "1.2.2", "05654514ac717ff3a1843204b424477d9e60c143406aa94daf2274fdd280794d", [:mix], [], "hexpm", "87631c7ad914a5a445f0a3809f99b079113ae4ed4b867348dd9eec288cecb6db"},
 }

@@ -8,20 +8,23 @@ export eServer, pServer, EvalServer, recv_erl, send_erl
 const _ESM = Module[]
 
 include("utils.jl")
+include("translate.jl")
 
 """
-    eServer(port::Integer)
-
-Create a module with an `EvalServer` listening to an UDP `port` 
+```
+eServer(host::IPAddr, port::Integer, key::AbstractString)
+eServer(port::Integer)
+```
+Create a module and spawn an `EvalServer` listening to an UDP `port` 
 in its namespace and return the module. 
 """
-function eServer(host::IPAddr, port::Integer)
+function eServer(host::IPAddr, port::Integer, key::AbstractString)
     sock = UDPSocket()
     if bind(sock, host, port)
         mdl = Module(gensym(:esm))
         hp = getHostPort(sock)
         println("start EvalServer $host:$(hp.port), $mdl")
-        t = Threads.@spawn EvalServer(sock, mdl)
+        t = Threads.@spawn EvalServer(sock, mdl, key)
         Core.eval(mdl, :(_socket = $sock))
         Core.eval(mdl, :(_eServer = $t))
         push!(_ESM, mdl)
@@ -31,10 +34,10 @@ function eServer(host::IPAddr, port::Integer)
         close(sock)
     end
 end
-eServer(port::Integer) = eServer(Sockets.localhost, port)
+eServer(port::Integer) = eServer(Sockets.localhost, port, "")
 
 """
-    EvalServer(port::Integer, mod::Module)
+    EvalServer(port::Integer, mod::Module, key::AbstractString)
 
 An `EvalServer` runs as a task with its own module namespace.
 It receives UDP message tuples from Erlang:
@@ -52,24 +55,27 @@ It then evaluates the messages in its namespace as
    
 It sends a result tuple back to the Erlang client.
 
-The server finishes if it gets an `"exit"` or `:exit` message. 
+The server finishes if it gets an `"exit"` or `:exit` message.
+
+If `!isempty(key)`, the UDP packages get HS256 encoded/decoded 
+with that key as JSON Web tokens.
 """
-function EvalServer(sock::UDPSocket, mod::Module)
+function EvalServer(sock::UDPSocket, mod::Module, key::AbstractString)
     while true
         hp, msg = recvfrom(sock)
         isexit(msg) && break
-        val = deserialize(msg)
+        val = deserializek(msg, key)
     # println(@show val)
         if val == :exit 
-            send(sock, hp.host, hp.port, serialize((:ok, :done)))
+            send(sock, hp.host, hp.port, serializek((:ok, :done), key))
             break
         else
             msg = try
                 res = _exec(mod, val)
-                serialize((:ok, res))
+                serializek((:ok, res), key)
             catch exc
             # rethrow()
-                serialize((:error, repr(exc)))
+                serializek((:error, repr(exc)), key)
             end
             send(sock, hp.host, hp.port, msg)
         end
@@ -113,35 +119,35 @@ isexit(msg) = msg == :exit
 """
 ```
 pServer(port::Integer)
-pServer(host::IPAddr, port::Integer)
+pServer(host::IPAddr, port::Integer, key::AbstractString)
 ```
 
 Start a server listening to an UDP `port` and starting 
 parallel `EvalServer`s if requested. 
 """
-function pServer(host::IPAddr, port::Integer)
+function pServer(host::IPAddr, port::Integer, key::AbstractString)
     sock = UDPSocket()
     if bind(sock, host, port)
-        Threads.@spawn _listen(sock, port)
+        Threads.@spawn _listen(sock, port, key)
     else
         println("host $host, port $port not available")
         close(sock)
     end
 end
-pServer(port::Integer) = pServer(ip"127.0.0.1", port)
+pServer(port::Integer) = pServer(Sockets.localhost, port, "")
 
 # listen to a UDP socket and start a parallel 
 # EvalServer if requested.
-function _listen(sock, port)
+function _listen(sock, port, key)
     while true
         hp, msg = recvfrom(sock)
         isexit(msg) && break
-        val = deserialize(msg)
+        val = deserializek(msg, key)
         if val == :exit 
-            send(sock, hp.host, hp.port, serialize((:ok, :done)))
+            send(sock, hp.host, hp.port, serializek((:ok, :done), key))
             break
         elseif val == :srv
-            md = parServer(hp)
+            md = parServer(hp, key)
             # println("parServer $md")
         else
             println("parServer cannot $val")
@@ -153,9 +159,9 @@ end
 
 # Start a parallel EvalServer at a random port and 
 # respond over its socket to the requesting client
-function parServer(client::Sockets.InetAddr)
-    md = client.host == Sockets.localhost ? eServer(0) : eServer(getipaddr(), 0)
-    send(md._socket, client.host, client.port, serialize((:ok, md)))
+function parServer(client::Sockets.InetAddr, key::AbstractString)
+    md = client.host == Sockets.localhost ? eServer(0) : eServer(getipaddr(), 0, key)
+    send(md._socket, client.host, client.port, serializek((:ok, md), key))
     md
 end
 
@@ -172,7 +178,7 @@ function recv_erl(socket::UDPSocket, timeout::Real=5)
         deserialize(fetch(t)) : 
         :timeout
 end
-
+    
 function recv_erl(port::Integer, timeout::Real=5)
     s = UDPSocket()
     rec = if bind(s, ip"127.0.0.1", port)
