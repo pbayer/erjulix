@@ -1,7 +1,8 @@
 using ErlangTerm
 import JSON, JSONWebTokens
 
-function serializek(data, key)
+"Serialize `data`, sha-256 encoded with `key` if it is not empty."
+function serializek(data, key::AbstractString)
     if isempty(key)
         serialize(data)
     else
@@ -14,7 +15,8 @@ function serializek(data, key)
     end
 end
 
-function deserializek(binary::Vector{UInt8}, key)
+"Deserialize a `binary`, sha-256 decoded with `key` if it is not empty."
+function deserializek(binary::Vector{UInt8}, key::AbstractString)
     if isempty(key)
         deserialize(binary)
     else

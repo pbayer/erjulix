@@ -103,7 +103,11 @@ srv({Host, Port, Key}) ->
     ok = gen_udp:send(Socket, Host, Port, term_to_binary_k(srv, Key)),
     Value = receive
         {udp, Socket, Shost, Sport, Recv} ->
-            {ok, {Shost, Sport}, binary_to_term_k(Recv, Key)}
+            Ret = binary_to_term_k(Recv, Key),
+            case Ret of
+                {ok, NKey, Mod} -> {ok, {Shost, Sport, NKey}, Mod};
+                {ok, Mod}       -> {ok, {Shost, Sport}, Mod}
+            end
         after 5000 ->
             timeout
         end,

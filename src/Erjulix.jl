@@ -1,3 +1,8 @@
+"""
+    Erjulix
+
+Julia module for communicating with Erlang and Elixir.
+"""
 module Erjulix
 
 using ErlangTerm, Sockets
@@ -57,7 +62,7 @@ It sends a result tuple back to the Erlang client.
 
 The server finishes if it gets an `"exit"` or `:exit` message.
 
-If `!isempty(key)`, the UDP packages get HS256 encoded/decoded 
+If `!isempty(key)`, the UDP packages get sha-256 encoded/decoded 
 with that key as JSON Web tokens.
 """
 function EvalServer(sock::UDPSocket, mod::Module, key::AbstractString)
@@ -160,8 +165,11 @@ end
 # Start a parallel EvalServer at a random port and 
 # respond over its socket to the requesting client
 function parServer(client::Sockets.InetAddr, key::AbstractString)
-    md = client.host == Sockets.localhost ? eServer(0) : eServer(getipaddr(), 0, key)
-    send(md._socket, client.host, client.port, serializek((:ok, md), key))
+    newKey = isempty(key) ? "" : genpasswd(24)
+    md = client.host == Sockets.localhost ? eServer(0) : eServer(getipaddr(), 0, newKey)
+    isempty(key) ? 
+        send(md._socket, client.host, client.port, serializek((:ok, md), key)) :
+        send(md._socket, client.host, client.port, serializek((:ok, newKey, md), key))
     md
 end
 
@@ -171,7 +179,7 @@ function recv_erl(socket::UDPSocket, timeout::Real=5)
     t = @async begin
         msg = recv(socket)
         notify(cond)
-        msg
+msg
     end
     wait(cond)
     t.state == :done ? 
