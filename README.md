@@ -18,52 +18,50 @@ Now Erlang and Elixir processes can send messages to each other since they run o
 
 ## A sample session
 
-In the Julia REPL we start a pServer task, which on demand spawns an `EvalServer` task with its own module namespace.
+In the Julia REPL we start a `pServer` task, which on demand spawns an `EvalServer` task with its own module namespace.
 
 ```julia
 julia> using Erjulix, Sockets
 
-julia> p = pServer(getipaddr(), 6000) # start a pServer on UDP socket 6000
-Task (runnable) @0x0000000117731550
+julia> pServer(6000)
+Task (runnable) @0x0000000110b30ab0
 ```
 
-In the Elixir REPL we request a Julia EvalServer and use it to 
-eval Julia expressions or to call Julia functions.
+In the Elixir REPL we request a Julia `EvalServer` and use it to 
+evaluate Julia expressions or to call Julia functions.
 
 ```elixir
-iex(1)> {:ok, jl, _} = :ejx_udp.srv({{192,168,2,113}, 6000}) # get an eval server from Julia
-{:ok, {{192, 168, 2, 113}, 58365}, {:ok, "Main.##esm#257"}}
+iex(1)> {:ok, jl, _} = :ejx_udp.srv(6000)  # get an eval server from Julia
+{:ok, {{127, 0, 0, 1}, 54465}, "Main.##esm#257"}
 iex(2)> :ejx_udp.eval(jl, "using .Threads")
 {:ok, []}
 iex(3)> :ejx_udp.call(jl, :threadid)
-{:ok, 2}
-iex(4)> :ejx_udp.call(jl, :factorial, [20])
-{:ok, 2432902008176640000}
-iex(5)> :ejx_udp.call(jl, :factorial, [50])
+{:ok, 3}
+iex(4)> :ejx_udp.call(jl, :factorial, [50])
 {:error,
  "OverflowError(\"50 is too large to look up in the table; consider using `factorial(big(50))` instead\")"}
-iex(6)> :ejx_udp.eval(jl, """    # define a function on the Julia server
-...(6)> function fact(x)
-...(6)>     factorial(big(x))
-...(6)> end
-...(6)> """)
+iex(5)> :ejx_udp.eval(jl, """    # define a function on the Julia server
+...(5)> function fact(x)
+...(5)>     factorial(big(x))
+...(5)> end
+...(5)> """)
 {:ok, "Main.##esm#257.fact"}
-iex(7)> :ejx_udp.call(jl, :fact, [50])
+iex(6)> :ejx_udp.call(jl, :fact, [50])
 {:ok, 30414093201713378043612608166064768844377641568960512000000000000}
-iex(8)> :timer.tc(:ejx_udp, :call, [jl, :fact, [55]])
-{528,
+iex(7)> :timer.tc(:ejx_udp, :call, [jl, :fact, [55]])
+{527,
  {:ok,
   12696403353658275925965100847566516959580321051449436762275840000000000000}}
 ```
 
-The last timing shows that the ping-pong for calling the created Julia fact function with data from Elixir and getting the result back takes roughly 500 µs with both sessions running on the same machine (MacBook Pro).
+The last timing shows that the ping-pong for calling the created Julia `fact` function with data from Elixir and getting the result back takes roughly 500 µs with both sessions running on the same machine (MacBook Pro).
 
 ```elixir
-iex(9)> a = Enum.map(1..10, fn _ -> :rand.uniform() end)
+iex(8)> a = Enum.map(1..10, fn _ -> :rand.uniform() end)
 [0.9414436609049482, 0.08244595999142224, 0.6727398779368937,
  0.18612089183158875, 0.7414592106015152, 0.7340558985797445,
  0.9511971092470349, 0.7139960750204088, 0.31514816254491884, 0.94168140313657]
-iex(10)> :ejx_udp.set(jl, :a, a)  # create variable a on the Julia server
+iex(9)> :ejx_udp.set(jl, :a, a)  # create variable a on the Julia server
 {:ok, []}
 ```
 
@@ -88,11 +86,48 @@ julia> exmod.a                  # and to the created variable a
 julia> using Plots ....
 ```
 
+### Working remotely
+
+If we start our `pServer` with the machine's IP address and a key, communication with remote clients get SHA-256 encrypted:
+
+```julia
+julia> getipaddr()
+ip"192.168.2.113"
+
+julia> key = Erjulix.genpasswd(12)
+"1XQeFem2NUNw"
+
+julia> pServer(getipaddr(), 6000, key)
+Task (runnable) @0x00000001110e7b90
+```
+
+We use the machine's IP address and that key to access the `pServer` from a Raspberry Pi in the local network:
+
+```elixir
+iex(1)> :inet.gethostname()
+{:ok, 'raspberrypi'}
+iex(2)> key = "1XQeFem2NUNw"
+"1XQeFem2NUNw"
+iex(3)> {:ok, jl, _} = :ejx_udp.srv({{192,168,2,113}, 6000, key})
+{:ok, {{192, 168, 2, 113}, 55052, "j8Gh3G6dPfJm28UpthL0dXew"}, "Main.##esm#258"}
+iex(4)> :ejx_udp.call(jl, :factorial, [20])
+{:ok, 2432902008176640000}
+iex(5)> :timer.tc(:ejx_udp, :call, [jl, :factorial, [20]])
+{86620, {:ok, 2432902008176640000}}
+```
+
+The `pServer` generated a new key for encrypted network access to the Julia `EvalServer`. The timing shows that network ping-pong took under 100 ms between the two machines.
+
+```elixir
+iex(9)> :ejx_udp.client(jl, :exit)
+{:ok, :done}
+```
+
 ## Rationale
 
-This is a quick prototype for interoperability based on [Erlang`s Term Format](http://erlang.org/doc/apps/erts/erl_ext_dist.html) over UDP. 
+This is a prototype for interoperability based on [Erlang`s Term Format](http://erlang.org/doc/apps/erts/erl_ext_dist.html) over UDP. 
 
-- It is suitable for experimenting and learning before providing Julia [Actors](https://github.com/JuliaActors/Actors.jl) with functionality for sharing messages with Erlang/Elixir.
+- It is aimed at experimenting and learning before providing Julia [Actors](https://github.com/JuliaActors/Actors.jl) with functionality for sharing messages with Erlang/Elixir.
 - It allows applications in Web services, IoT or microservices.
 - A more general application, providing message-based interop also with other languages should be done with [OSC](http://opensoundcontrol.org).
 
@@ -134,4 +169,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/erjulix](https://hexdocs.pm/erjulix).
-
