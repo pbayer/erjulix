@@ -88,7 +88,7 @@ julia> using Plots ....
 
 ### Working remotely
 
-If we start our `pServer` with the machine's IP address and a key, communication with remote clients get SHA-256 encrypted:
+If we start our `pServer` with the machine's IP address and a key, communication with remote clients gets SHA-256 encrypted:
 
 ```julia
 julia> getipaddr()
@@ -116,7 +116,7 @@ iex(5)> :timer.tc(:ejx_udp, :call, [jl, :factorial, [20]])
 {86620, {:ok, 2432902008176640000}}
 ```
 
-The `pServer` generated a new key for encrypted network access to the Julia `EvalServer`. The timing shows that network ping-pong took under 100 ms between the two machines.
+The `pServer` generated a new key for encrypted network access to the Julia `EvalServer`. The timing shows that network ping-pong took under 100 ms between the two machines (without encryption it takes around 70 ms).
 
 ```elixir
 iex(9)> :ejx_udp.client(jl, :exit)

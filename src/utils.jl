@@ -1,10 +1,9 @@
-using Random # , Base64
+using Random
 
-const chars = ['a':'z'; 'A':'Z'; '0':'9']
+const chars = ['a':'z'; 'A':'Z'; '0':'9'; ['/','+','-','=']]
 
 "Return a Base64 encoded random passwort of length `len`."
-genpasswd(len) = randstring(chars, len) # |> base64encode |> String
-# genpasswd(len) = read(`openssl rand -base64 $len`, String) |> rstrip
+genpasswd(len) = randstring(chars, len)
 
 "Return an available port number ≥ `start`."
 function getPort(start::Integer)

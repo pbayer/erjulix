@@ -14,12 +14,13 @@ erl_crash.dump
 erjulix-*.tar
 # Temporary files, for example, from tests.
 /tmp/
+*.swp
 
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
 .DS_Store
-# /Manifest.toml
+/Manifest.toml
 /dev/
 docs/build
 docs/Manifest.toml

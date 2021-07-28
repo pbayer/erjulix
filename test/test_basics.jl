@@ -46,7 +46,7 @@ sleep(0.2)
 @test Erjulix._ESM[end]._eServer.state == :runnable
 pkg = recv(erl)
 msg = deserialize(pkg)
-@test msg == (:ok, [])
+@test msg == (:ok, :nil)
 @test Erjulix._ESM[end].a == collect(21:30)
 
 # test exit

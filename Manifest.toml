@@ -11,11 +11,9 @@ deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
 [[ErlangTerm]]
-git-tree-sha1 = "89f4abcd4934165aa06a00c69bed94ad4b4f22ed"
-repo-rev = "master"
-repo-url = "https://github.com/pbayer/ErlangTerm.jl"
+git-tree-sha1 = "fdee66b9843f7aa370518b274cffddc10e6e7f54"
 uuid = "6cf46ab0-e18c-5424-9784-c70c22e5b0c7"
-version = "0.1.0"
+version = "0.1.1"
 
 [[JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
