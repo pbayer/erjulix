@@ -145,7 +145,7 @@ a key to the `pServer`, data transmissions will use SHA-256 encryption.
 
 ## Dependencies
 
-- The Julia package currently depends on [a fork](https://github.com/pbayer/ErlangTerm.jl) of `ErlangTerm`. There is a [PR](https://github.com/helgee/ErlangTerm.jl/pull/3) to update the official version.
+- The Julia package currently depends on [`ErlangTerm.jl`](https://github.com/helgee/ErlangTerm.jl).
 - The Erlang/Elixir part depends on [a fork](https://github.com/pbayer/jwerl) of `jwerl`, compatible with Erlang/OTP 24. There is [an issue](https://gitlab.com/glejeune/jwerl/-/issues/18) to update the main repo.
 
 ## Installation
